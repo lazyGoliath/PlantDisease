@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plant Disease Predictor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="page-shell">
+    <section class="hero">
+      <p class="eyebrow">TensorFlow / Keras browser demo</p>
+      <h1>Plant Disease Predictor</h1>
+      <p class="subtitle">Upload a leaf image or use one of the sample images from <span>test_images</span> to see the top predictions.</p>
+      <div class="meta-row">
+        <div><span>Model</span><strong>{{ model_name }}</strong></div>
+        <div><span>Input</span><strong>{{ input_size }}</strong></div>
+        <div><span>Classes</span><strong>38</strong></div>
+      </div>
+      <div class="hero-actions">
+        <a class="button-link" href="{{ url_for('summary') }}">View model summary</a>
+      </div>
+    </section>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash">{{ messages[0] }}</div>
+      {% endif %}
+    {% endwith %}
+
+    <section class="panel upload-panel">
+      <form class="upload-form" action="{{ url_for('predict') }}" method="post" enctype="multipart/form-data">
+        <div>
+          <label for="image">Upload image</label>
+          <input id="image" name="image" type="file" accept="image/*">
+        </div>
+        <button type="submit">Predict uploaded image</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="section-header">
+        <h2>Sample images</h2>
+        <p>Click any sample to run the model in the browser.</p>
+      </div>
+      <div class="sample-grid">
+        {% for image in sample_images %}
+          <div class="sample-card">
+            <img src="{{ url_for('sample_image', filename=image.relative_path) }}" alt="{{ image.name }}">
+            <div class="sample-card-body">
+              <div>
+                <strong>{{ image.label }}</strong>
+                <span>{{ image.name }}</span>
+              </div>
+              <form action="{{ url_for('predict') }}" method="post">
+                <input type="hidden" name="sample_path" value="{{ image.relative_path }}">
+                <button type="submit">Predict</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    {% if result %}
+      <section class="panel result-panel">
+        <div class="section-header">
+          <h2>Prediction</h2>
+          <p>Top label and confidence from the model.</p>
+        </div>
+        <div class="result-grid">
+          <div class="preview-card">
+            {% if selected_image.data_uri %}
+              <img src="{{ selected_image.data_uri }}" alt="Selected image">
+            {% else %}
+              <img src="{{ selected_image.url }}" alt="Selected image">
+            {% endif %}
+            <span>{{ selected_image.name }}</span>
+          </div>
+          <div class="prediction-card">
+            <div class="prediction-badge">{{ result.predicted_class }}</div>
+            <p class="confidence">Confidence: {{ '%.2f'|format(result.confidence * 100) }}%</p>
+            <div class="top-list">
+              {% for item in result.top_predictions %}
+                <div class="top-item">
+                  <span>{{ item.class_name }}</span>
+                  <strong>{{ '%.2f'|format(item.confidence * 100) }}%</strong>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </section>
+    {% endif %}
+  </div>
+</body>
+</html>

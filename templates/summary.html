@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Model Summary</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="page-shell">
+    <section class="panel">
+        <div class="hero-actions summary-actions">
+            <a class="button-link" href="{{ url_for('home') }}">Back to predictor</a>
+        </div>
+        <h2>Model Summary</h2>
+        <pre style="overflow-x:auto; white-space:pre-wrap;">
+{{ summary }}
+        </pre>
+    </section>
+</div>
+</body>
+</html>
