@@ -88,10 +88,72 @@
                 </div>
               {% endfor %}
             </div>
+            <div class="chart-wrap">
+              <h3>Top 5 Prediction Scores</h3>
+              <canvas id="topPredictionsChart"></canvas>
+            </div>
           </div>
         </div>
       </section>
     {% endif %}
   </div>
+
+  {% if result %}
+    <script id="top-predictions-data" type="application/json">{{ result.top_predictions | tojson }}</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      const topPredictionData = JSON.parse(document.getElementById("top-predictions-data").textContent);
+      const topPredictionLabels = topPredictionData.map((item) => item.class_name.replace(/___/g, " / "));
+      const topPredictionValues = topPredictionData.map((item) => Number(item.confidence) * 100);
+
+      const minScore = Math.min(...topPredictionValues);
+      const maxScore = Math.max(...topPredictionValues);
+      const scoreSpan = maxScore - minScore;
+
+      const minVisibleSpan = 2;
+      const effectiveSpan = Math.max(scoreSpan, minVisibleSpan);
+      const padding = effectiveSpan * 0.2;
+
+      const xAxisMin = Math.max(0, minScore - padding);
+      const xAxisMax = Math.min(100, maxScore + padding);
+
+      const topPredictionChartCtx = document.getElementById("topPredictionsChart");
+      if (topPredictionChartCtx) {
+        new Chart(topPredictionChartCtx, {
+          type: "bar",
+          data: {
+            labels: topPredictionLabels,
+            datasets: [{
+              label: "Confidence %",
+              data: topPredictionValues,
+              backgroundColor: ["#1f7a4f", "#3b955f", "#57a86c", "#75bb79", "#93cf87"],
+              borderRadius: 10,
+              borderSkipped: false,
+            }],
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+            },
+            scales: {
+              x: {
+                min: xAxisMin,
+                max: xAxisMax,
+                grid: { color: "rgba(30, 43, 32, 0.12)" },
+                ticks: {
+                  callback: (value) => `${Number(value).toFixed(2)}%`,
+                },
+              },
+              y: {
+                grid: { display: false },
+              },
+            },
+          },
+        });
+      }
+    </script>
+  {% endif %}
 </body>
 </html>
