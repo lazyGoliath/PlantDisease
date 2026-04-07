@@ -5,6 +5,7 @@ __pycache__/
 *.pyd
 .env
 .DS_Store
+*.ipynb
 
 model_epoch_07.keras
 model_epoch_13.keras

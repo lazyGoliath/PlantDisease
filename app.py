@@ -1,3 +1,6 @@
+import io
+import base64
+
 from flask import Flask, render_template, request
 import tensorflow as tf
 import numpy as np
@@ -68,19 +71,40 @@ def predict():
     from PIL import Image
 
     file = request.files.get("image")
+    selected_image = None
 
     if file:
-        img = Image.open(file).resize((224, 224))
-        img = np.array(img) / 255.0
-        img = np.expand_dims(img, axis=0)
+        file_bytes = file.read()
+        img = Image.open(io.BytesIO(file_bytes)).resize((224, 224))
+        img_array = np.array(img) / 255.0
+        img_array = np.expand_dims(img_array, axis=0)
 
+        encoded = base64.b64encode(file_bytes).decode("utf-8")
+        mime_type = file.mimetype or "image/png"
+        selected_image = {
+            "data_uri": f"data:{mime_type};base64,{encoded}",
+            "name": file.filename
+        }
+        
+        print("Image shape:", img_array.shape)
+        print("Min/max values:", img_array.min(), img_array.max())
     else:
-        sample_path = request.form.get("sample_path")
-        img = Image.open("test_images/" + sample_path).resize((224, 224))
-        img = np.array(img) / 255.0
-        img = np.expand_dims(img, axis=0)
+        return render_template(
+            "index.html",
+            model_name=MODEL_NAME,
+            input_size=INPUT_SIZE,
+            sample_images=sample_images,
+            result=None,
+            selected_image=None,
+        )
 
-    preds = model.predict(img)[0]
+    # else:
+    #     sample_path = request.form.get("sample_path")
+    #     img = Image.open("test_images/" + sample_path).resize((224, 224))
+    #     img = np.array(img) / 255.0
+    #     img = np.expand_dims(img, axis=0)
+
+    preds = model.predict(img_array)[0]
 
     predicted_index = np.argmax(preds)
     predicted_class = CLASS_NAMES[predicted_index]
@@ -97,12 +121,6 @@ def predict():
         for i in top_indices
     ]
     
-    import base64
-
-    img_bytes = file.read()
-    encoded = base64.b64encode(img_bytes).decode()
-
-
     return render_template(
         "index.html",   # IMPORTANT: same page
         model_name=MODEL_NAME,
@@ -112,10 +130,7 @@ def predict():
             "confidence": confidence,
             "top_predictions": top_predictions
         },
-        selected_image = {
-            "data_uri": f"data:image/png;base64,{encoded}",
-            "name": file.filename
-        },
+        selected_image=selected_image,
         sample_images=sample_images
     )
 
@@ -126,7 +141,32 @@ def summary():
 
     summary_str = "\n".join(stringlist)
 
-    return render_template("summary.html", summary=summary_str)
+    layer_type_counts = {}
+    for layer in model.layers:
+        layer_type = layer.__class__.__name__
+        layer_type_counts[layer_type] = layer_type_counts.get(layer_type, 0) + 1
+
+    trainable_params = int(
+        np.sum([tf.keras.backend.count_params(w) for w in model.trainable_weights])
+    )
+    non_trainable_params = int(
+        np.sum([tf.keras.backend.count_params(w) for w in model.non_trainable_weights])
+    )
+
+    summary_metrics = {
+        "layer_count": len(model.layers),
+        "total_params": int(model.count_params()),
+        "trainable_params": trainable_params,
+        "non_trainable_params": non_trainable_params,
+    }
+
+    return render_template(
+        "summary.html",
+        summary=summary_str,
+        summary_metrics=summary_metrics,
+        layer_type_labels=list(layer_type_counts.keys()),
+        layer_type_values=list(layer_type_counts.values()),
+    )
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)
