@@ -27,7 +27,7 @@ dataset/
 # Jupyter checkpoints
 .ipynb_checkpoints/
 
-# Python cache
+# Python cache  
 __pycache__/
 *.pyc
 
