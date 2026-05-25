@@ -74,29 +74,27 @@ python app.py
 
 The application will be available at `http://localhost:5000`
 
-#### Home Page
+- Home Page
 Upload a plant leaf image to get disease predictions.
 
-**Screenshot - Home Page:**
-```
-![](pics/home.png)
-```
+   * Screenshot - Home Page:
+   
+   ![Home Page](pics/home.png)
 
-#### Predict Page
+- Predict Page
 View real-time predictions and model confidence scores.
 
-**Screenshot - Predict Page:**
-```
-![](pics/predict.png)
-```
+   * Screenshot - Predict Page:
+   
+   ![Home Page](./pics/home.png)
 
-#### Summary Page
+- Summary Page
 Review prediction history and statistics.
 
-**Screenshot - Summary Page:**
-```
-![](pics/summary.png)
-```
+   * Screenshot - Summary Page:
+   
+   ![Summary Page](./pics/summary.png)
+
 
 ## Project Structure
 
