@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Model Summary</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="page-shell">
+    <section class="panel">
+        <div class="hero-actions summary-actions">
+            <a class="button-link" href="{{ url_for('home') }}">Back to predictor</a>
+        </div>
+        <div class="section-header">
+            <h2>Model Summary</h2>
+            <p>Layer-wise architecture output from TensorFlow/Keras.</p>
+        </div>
+        <div class="summary-metrics-grid">
+            <article class="metric-card">
+                <span>Total Layers</span>
+                <strong>{{ summary_metrics.layer_count }}</strong>
+            </article>
+            <article class="metric-card">
+                <span>Total Params</span>
+                <strong>{{ "{:,}".format(summary_metrics.total_params) }}</strong>
+            </article>
+            <article class="metric-card">
+                <span>Trainable Params</span>
+                <strong>{{ "{:,}".format(summary_metrics.trainable_params) }}</strong>
+            </article>
+            <article class="metric-card">
+                <span>Non-trainable Params</span>
+                <strong>{{ "{:,}".format(summary_metrics.non_trainable_params) }}</strong>
+            </article>
+        </div>
+        <div class="chart-wrap summary-chart-wrap">
+            <h3>Layer Type Distribution</h3>
+            <canvas id="layerTypeChart"></canvas>
+        </div>
+        <pre class="summary-pre">
+{{ summary }}
+        </pre>
+    </section>
+</div>
+
+<script id="layer-chart-data" type="application/json">{{ {"labels": layer_type_labels, "values": layer_type_values} | tojson }}</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const layerChartPayload = JSON.parse(document.getElementById("layer-chart-data").textContent);
+    const layerTypeLabels = layerChartPayload.labels;
+    const layerTypeValues = layerChartPayload.values;
+
+    const layerTypeChartCtx = document.getElementById("layerTypeChart");
+    if (layerTypeChartCtx) {
+        new Chart(layerTypeChartCtx, {
+            type: "doughnut",
+            data: {
+                labels: layerTypeLabels,
+                datasets: [{
+                    data: layerTypeValues,
+                    backgroundColor: ["#1f7a4f", "#cb5d2a", "#3b955f", "#d9923b", "#75bb79", "#f1b868", "#acc98a"],
+                    borderWidth: 1,
+                    borderColor: "rgba(255, 255, 255, 0.7)",
+                }],
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: "bottom",
+                    },
+                },
+            },
+        });
+    }
+</script>
+</body>
+</html>
