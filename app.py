@@ -51,7 +51,7 @@ CLASS_NAMES = [
 sample_images = ""
 
 # Load model once
-model = tf.keras.models.load_model("model_epoch_07.keras")
+model = tf.keras.models.load_model("model_epoch_13.keras")
 
 MODEL_NAME = model.name
 INPUT_SIZE = model.input_shape[1:3]  # (224,224)
