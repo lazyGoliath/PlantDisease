@@ -17,3 +17,15 @@ dataset/
 # Python cache
 __pycache__/
 *.pyc
+
+# Python environment and OS artifacts
+venv/
+*.pyo
+*.pyd
+.env
+.DS_Store
+
+# Notebooks and model files
+*.ipynb
+
+*.keras
